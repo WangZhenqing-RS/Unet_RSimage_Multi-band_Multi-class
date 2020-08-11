@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from Model.seg_unet import unet
+from seg_unet import unet
 #from Model.seg_hrnet import seg_hrnet
 from dataProcess import trainGenerator, color_dict
 from keras.callbacks import ModelCheckpoint
