@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from seg_unet import unet
 #from Model.seg_hrnet import seg_hrnet
 from dataProcess import trainGenerator, color_dict
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import matplotlib.pyplot as plt
 import datetime
 import xlwt
@@ -80,6 +80,10 @@ model = unet(pretrained_weights = premodel_path,
 #  打印模型结构
 model.summary()
 #  回调函数
+#  val_loss连续10轮没有下降则停止训练
+early_stopping = EarlyStopping(monitor = 'val_loss', patience = 10)
+#  当3个epoch过去而val_loss不下降时，学习率减半
+reduce_lr = ReduceLROnPlateau(monitor = 'val_loss', factor = 0.5, patience = 3, verbose = 1)
 model_checkpoint = ModelCheckpoint(model_path,
                                    monitor = 'loss',
                                    verbose = 1,# 日志显示模式:0->安静模式,1->进度条,2->每轮一行
@@ -92,7 +96,7 @@ start_time = datetime.datetime.now()
 history = model.fit_generator(train_Generator,
                     steps_per_epoch = steps_per_epoch,
                     epochs = epochs,
-                    callbacks = [model_checkpoint],
+                    callbacks = [early_stopping, model_checkpoint, model_checkpoint],
                     validation_data = validation_data,
                     validation_steps = validation_steps)
 
